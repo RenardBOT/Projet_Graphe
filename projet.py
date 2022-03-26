@@ -10,6 +10,7 @@ class Graph:
             res+=str(edge)+"\n"
         return res
     
+    # Return number of vertex
     def __len__(self):
         unique = []
         for edge in self.edges:
@@ -18,6 +19,7 @@ class Graph:
                     unique.append(vertex)
         return len(unique)
 
+    # List all vertex
     def listVertices(self):
         unique = []
         for edge in self.edges:
@@ -26,9 +28,20 @@ class Graph:
                     unique.append(vertex)
         return unique
     
+    # Return an array which contain the degree for each vertex
+    # Ex : index = 0, value = 4 mean the first vertex as a degree of 4
+    def degreeByVertex(self):
+        degrees = []
+        vertices = self.listVertices()
+        for vertex in vertices:
+            degrees.append(self.degree(vertex))
+        return degrees
+                
+    # Add one edge with the value v
     def addEdge(self,v):
         self.edges.append(v)
 
+    # Return all neighbours
     def neighbours(self,v):
         neighbours = []
         for edge in self.edges:
@@ -38,6 +51,7 @@ class Graph:
                 neighbours.append(edge[0])
         return neighbours
     
+    #  Remove edge with the value v
     def remove(self,v):
         delete = []
         for edge in self.edges:
@@ -46,7 +60,7 @@ class Graph:
         for edge in delete:
             self.edges.remove(edge)
 
-
+    # Return degree of vertex v
     def degree(self,v):
         return len(self.neighbours(v))
 
@@ -70,7 +84,50 @@ class Graph:
                         centres[k].append(vertex)
                         rec = True    
         return (k,centres)
-            
+    
+    def matulaBeckDegeneracy(self):
+        # https://en.wikipedia.org/wiki/Degeneracy_(graph_theory)#Algorithms
+        # https://schulzchristian.github.io/thesis/thesis_huebner.pdf Page 6
+        Dv = self.degreeByVertex()
+        D = self.getBucketPriorityQueue(Dv)
+        k = 0
+        i = 0
+        L = []
+        for dontCare in Dv:
+            i = twoDimArrayIndexHelper(D)
+            k = max(k,i)
+            L.append(D[i][0])
+            for neighbour in self.neighbours(D[i][0]):
+                if neighbour not in L:
+                    Dv[neighbour]-=1
+                    v = D[i].pop(0)
+                    D[Dv[neighbour]].append(v)
+        return L
+    
+    def getBucketPriorityQueue(self, degreeByVertex):
+        D = [[]] * len(self)
+        vertex = 1
+        for degree in degreeByVertex:
+            D[degree].append(vertex)
+            vertex+=1
+        return D
+
+
+    
+# Return the index of the first array which is not empty inside of a two dim array
+# Ex : [[],[],[5],[5,6,7]] return 2
+# Ex : [[]] return -1
+def twoDimArrayIndexHelper(twoDimArray):
+    index = 0
+    empty = True
+    while(empty):
+        empty = len(twoDimArray[index]) == 0
+        index+=1
+    index-=1
+    if empty:
+        return -1
+    else:
+        return index
 
 def readGraph(path):
     g = Graph()
@@ -83,7 +140,7 @@ def readGraph(path):
     return g
 
 #A1 B2 C3 D4 E5 F6 G7 H8 I9 J10
-g = readGraph("./ucidata-zachary/dataset1")
+g = readGraph("./graphes/ucidata-zachary/dataset1")
 z = Graph()
 print(len(z))
 z.edges = [
@@ -109,3 +166,4 @@ z.edges = [
 print("Degenerancy : "+str(degen))
 print("Centres : ")
 print(dic)
+print(z.matulaBeckDegeneracy())
