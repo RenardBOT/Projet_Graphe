@@ -85,27 +85,32 @@ class Graph:
                         rec = True    
         return (k,centres)
     
+    #At the end of the algorithm, any vertex L[i] will have at most k edges
     def matulaBeckDegeneracy(self):
         # https://en.wikipedia.org/wiki/Degeneracy_(graph_theory)#Algorithms
-        # https://schulzchristian.github.io/thesis/thesis_huebner.pdf Page 6
-        Dv = self.degreeByVertex()
-        D = self.getBucketPriorityQueue(Dv)
+        # https://schulzchristian.github.io/thesis/thesis_huebner.pdf Page 16
+        L = []
+        d = self.degreeByVertex()
+        D = self.getBucketPriorityQueue(d)
         k = 0
         i = 0
-        L = []
-        for dontCare in Dv:
+        for dontCare in range(0,len(d)):
             i = twoDimArrayIndexHelper(D)
             k = max(k,i)
-            L.append(D[i][0])
-            for neighbour in self.neighbours(D[i][0]):
+            v = D[i].pop(0)
+            L.insert(0,v)
+            for neighbour in self.neighbours(v):
                 if neighbour not in L:
-                    Dv[neighbour]-=1
-                    v = D[i].pop(0)
-                    D[Dv[neighbour]].append(v)
-        return L
+                    indexNeighbour = neighbour-1 # neighbour-1 because array don't start at 1. So vertex number 4 is located at index 3 
+                    D[d[indexNeighbour]].remove(neighbour)
+                    d[indexNeighbour]-=1
+                    D[d[indexNeighbour]].append(neighbour)
+        return (k,L)
     
     def getBucketPriorityQueue(self, degreeByVertex):
-        D = [[]] * len(self)
+        D = []
+        for i in range(0,len(self)-1) :
+            D.append([])
         vertex = 1
         for degree in degreeByVertex:
             D[degree].append(vertex)
@@ -142,7 +147,7 @@ def readGraph(path):
 #A1 B2 C3 D4 E5 F6 G7 H8 I9 J10
 g = readGraph("./graphes/ucidata-zachary/dataset1")
 z = Graph()
-print(len(z))
+#print(len(z))
 z.edges = [
     [1,2],
     [1,3],
