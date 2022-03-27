@@ -171,4 +171,5 @@ z.edges = [
 print("Degenerancy : "+str(degen))
 print("Centres : ")
 print(dic)
-print(z.matulaBeckDegeneracy())
+(degenMB,verticesMB) = z.matulaBeckDegeneracy()
+print("Matula & Beck degenerancy :",degenMB,"\nMatula & Beck output vertices :",verticesMB)
