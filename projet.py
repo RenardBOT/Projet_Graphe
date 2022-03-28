@@ -85,7 +85,7 @@ class Graph:
                         rec = True    
         return (k,centres)
     
-    #At the end of the algorithm, any vertex L[i] will have at most k edges
+    # At the end of the algorithm, any vertex L[i] will have at most k edges
     def matulaBeckDegeneracy(self):
         # https://en.wikipedia.org/wiki/Degeneracy_(graph_theory)#Algorithms
         # https://schulzchristian.github.io/thesis/thesis_huebner.pdf Page 16
@@ -115,8 +115,62 @@ class Graph:
         for degree in degreeByVertex:
             D[degree].append(vertex)
             vertex+=1
-        return D
+        return D     
 
+    def dsatur(self):
+        maxColor = -1
+        verticesLength = len(self)
+
+        DSAT = [0] * verticesLength
+        vertexColor = [-1] * verticesLength
+
+        counter = 0
+        while(counter < verticesLength) :
+            dsatVertex = self.dsaturGetVertex(DSAT,vertexColor,verticesLength)
+            color = self.dsaturGetColor(DSAT, vertexColor, verticesLength, dsatVertex)
+            
+            vertexColor[dsatVertex-1] = color
+            if color > maxColor :
+               maxColor = color
+
+            counter+=1
+        return (maxColor+1,vertexColor)
+
+    def dsaturGetVertex(self, DSAT, vertexColor, verticesLength):
+        dsatVertex = 0
+        dsatDegree = 0
+        dsatMax = -1
+        for vertex in range(1,verticesLength+1) :
+            vertexIndex = vertex - 1
+            if vertexColor[vertexIndex] == -1 :
+                if DSAT[vertexIndex] > dsatMax :
+                    dsatMax = DSAT[vertexIndex]
+                    dsatVertex = vertex
+                    dsatDegree = self.degree(vertex)
+                elif DSAT[vertexIndex] == dsatMax :
+                    currentDegree = self.degree(vertex)
+                    if currentDegree > dsatDegree :
+                        dsatDegree = currentDegree
+                        dsatVertex = vertex
+        return dsatVertex    
+
+    def dsaturGetColor(self, DSAT, vertexColor, verticesLength, dsatVertex):
+        colorIsUsed = [False] * verticesLength
+
+        neighbours = self.neighbours(dsatVertex)
+        print(dsatVertex,neighbours)
+        for neighbour in neighbours :
+            neighbourIndex = neighbour - 1
+            if vertexColor[neighbourIndex] != -1:
+                colorIsUsed[vertexColor[neighbourIndex]] = True
+                print(colorIsUsed,vertexColor)
+                DSAT[neighbourIndex]+=1
+
+        color = 0
+        while colorIsUsed[color] :
+            color+=1
+        print(dsatVertex,color)
+        return color
 
     
 # Return the index of the first array which is not empty inside of a two dim array
@@ -173,3 +227,5 @@ print("Centres : ")
 print(dic)
 (degenMB,verticesMB) = z.matulaBeckDegeneracy()
 print("Matula & Beck degenerancy :",degenMB,"\nMatula & Beck output vertices :",verticesMB)
+(chromaticNb,colors) = z.dsatur()
+print("Nombre chromatique :",chromaticNb,"\nCouleurs :",colors)
