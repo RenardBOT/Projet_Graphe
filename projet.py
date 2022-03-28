@@ -158,18 +158,15 @@ class Graph:
         colorIsUsed = [False] * verticesLength
 
         neighbours = self.neighbours(dsatVertex)
-        print(dsatVertex,neighbours)
         for neighbour in neighbours :
             neighbourIndex = neighbour - 1
             if vertexColor[neighbourIndex] != -1:
                 colorIsUsed[vertexColor[neighbourIndex]] = True
-                print(colorIsUsed,vertexColor)
                 DSAT[neighbourIndex]+=1
 
         color = 0
         while colorIsUsed[color] :
             color+=1
-        print(dsatVertex,color)
         return color
 
     
@@ -222,9 +219,8 @@ z.edges = [
     [8,9]
 ]
 (degen,dic) = z.degeneracy()
-print("Degenerancy : "+str(degen))
-print("Centres : ")
-print(dic)
+print("Degenerancy :",str(degen))
+print("Centres :",dic)
 (degenMB,verticesMB) = z.matulaBeckDegeneracy()
 print("Matula & Beck degenerancy :",degenMB,"\nMatula & Beck output vertices :",verticesMB)
 (chromaticNb,colors) = z.dsatur()
