@@ -1,30 +1,33 @@
 import copy
 
-
 class Graph:
-    # A graph object is represented by its list of vertices
     def __init__(self):
         self.edges = []
 
-    # Returns the graph in string format
     def __str__(self):
-        res = ""
+        res=""
         for edge in self.edges:
-            res += str(edge) + "\n"
+            res+=str(edge)+"\n"
         return res
-
-    # Returns the order of the graph
+    
+    # Return number of vertex
     def __len__(self):
-        return len(self.listVertices())
-
-    # Lists all vertices
-    def listVertices(self):
-        unique = set()  # This is a set. Set is a list that can only contain unique elements
+        unique = []
         for edge in self.edges:
             for vertex in edge:
-                unique.add(vertex)
-        return list(unique)
+                if vertex not in unique:
+                    unique.append(vertex)
+        return len(unique)
 
+    # List all vertex
+    def listVertices(self):
+        unique = []
+        for edge in self.edges:
+            for vertex in edge:
+                if vertex not in unique:
+                    unique.append(vertex)
+        return unique
+    
     # Return an array which contain the degree for each vertex
     # Ex : index = 0, value = 4 mean the first vertex as a degree of 4
     def degreeByVertex(self):
@@ -33,13 +36,13 @@ class Graph:
         for vertex in vertices:
             degrees.append(self.degree(vertex))
         return degrees
-
-    # Adds edge v(a,b) to the graph
-    def addEdge(self, v):
+                
+    # Add one edge with the value v
+    def addEdge(self,v):
         self.edges.append(v)
 
     # Return all neighbours
-    def neighbours(self, v):
+    def neighbours(self,v):
         neighbours = []
         for edge in self.edges:
             if edge[0] == v:
@@ -47,9 +50,9 @@ class Graph:
             elif edge[1] == v:
                 neighbours.append(edge[0])
         return neighbours
-
+    
     #  Remove edge with the value v
-    def remove(self, v):
+    def remove(self,v):
         delete = []
         for edge in self.edges:
             if edge[0] == v or edge[1] == v:
@@ -58,7 +61,7 @@ class Graph:
             self.edges.remove(edge)
 
     # Return degree of vertex v
-    def degree(self, v):
+    def degree(self,v):
         return len(self.neighbours(v))
 
     def degeneracy(self):
@@ -66,10 +69,10 @@ class Graph:
         g = copy.deepcopy(self)
         vertices = g.listVertices()
         centres = {}
-
-        while (len(g) > 0 and k < 500):
+        
+        while(len(g) > 0 and k < 500):
             rec = True
-            k = k + 1
+            k = k+1
             centres[k] = []
             while rec is True:
                 rec = False
@@ -90,22 +93,22 @@ class Graph:
         D = self.getBucketPriorityQueue(d)
         k = 0
         i = 0
-        for j in range(0, len(d)):
+        for dontCare in range(0,len(d)):
             i = twoDimArrayIndexHelper(D)
-            k = max(k, i)
+            k = max(k,i)
             v = D[i].pop(0)
-            L.insert(0, v)
+            L.insert(0,v)
             for neighbour in self.neighbours(v):
                 if neighbour not in L:
-                    indexNeighbour = neighbour - 1  # Array first index is 0
+                    indexNeighbour = neighbour-1 # neighbour-1 because array don't start at 1. So vertex number 4 is located at index 3 
                     D[d[indexNeighbour]].remove(neighbour)
-                    d[indexNeighbour] -= 1
+                    d[indexNeighbour]-=1
                     D[d[indexNeighbour]].append(neighbour)
-        return (k, L)
-
+        return (k,L)
+    
     def getBucketPriorityQueue(self, degreeByVertex):
         D = []
-        for i in range(0, len(self) - 1):
+        for i in range(0,len(self)-1) :
             D.append([])
         vertex = 1
         for degree in degreeByVertex:
@@ -165,56 +168,34 @@ class Graph:
             color+=1
         return color
 
+    
 # Return the index of the first array which is not empty inside of a two dim array
 # Ex : [[],[],[5],[5,6,7]] return 2
 # Ex : [[]] return -1
 def twoDimArrayIndexHelper(twoDimArray):
     index = 0
     empty = True
-    while (empty):
+    while(empty):
         empty = len(twoDimArray[index]) == 0
-        index += 1
-    index -= 1
+        index+=1
+    index-=1
     if empty:
         return -1
     else:
         return index
 
-# Reads non-oriented graphs in ??? format
 def readGraph(path):
     g = Graph()
-    file = open(path, "r")
+    file = open(path,"r")
     lines = file.readlines()
     g.vertices = int(lines[1].split()[3])
     for line in lines:
         if line[0] != "%":
-            g.addEdge((int(i) for i in line.split()))
+            g.addEdge([int(i) for i in line.split()])
     return g
 
+z = readGraph("./graphes/ucidata-zachary/dataset1")
 
-g = readGraph("./graphes/ucidata-zachary/dataset1")
-z = Graph()
-
-# Graph seen in class
-z.edges = [
-    (1, 2),
-    (1, 3),
-    (1, 4),
-    (1, 5),
-    (1, 6),
-    (2, 7),
-    (3, 4),
-    (3, 5),
-    (4, 6),
-    (5, 6),
-    (5, 7),
-    (6, 7),
-    (6, 8),
-    (6, 9),
-    (6, 10),
-    (7, 8),
-    (8, 9)
-]
 (degen,dic) = z.degeneracy()
 print("Degenerancy :",str(degen))
 print("Centres :",dic)
