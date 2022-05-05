@@ -1,16 +1,18 @@
 import copy
 
+# A graph is an object that only contains an array of edges : 
 class Graph:
     def __init__(self):
         self.edges = []
 
+    # String allowing to print the graph
     def __str__(self):
         res=""
         for edge in self.edges:
             res+=str(edge)+"\n"
         return res
     
-    # Return number of vertex
+    # Returns the amount of vertices
     def __len__(self):
         unique = []
         for edge in self.edges:
@@ -19,7 +21,7 @@ class Graph:
                     unique.append(vertex)
         return len(unique)
 
-    # List all vertex
+    # Lists all vertices
     def listVertices(self):
         unique = []
         for edge in self.edges:
@@ -28,8 +30,8 @@ class Graph:
                     unique.append(vertex)
         return unique
     
-    # Return an array which contain the degree for each vertex
-    # Ex : index = 0, value = 4 mean the first vertex as a degree of 4
+    # Returns an array containing the degree of each vertex
+    # Ex : index = 0, value = 4 mean the first vertex has a degree of 4
     def degreeByVertex(self):
         degrees = []
         vertices = self.listVertices()
@@ -37,11 +39,11 @@ class Graph:
             degrees.append(self.degree(vertex))
         return degrees
                 
-    # Add one edge with the value v
+    # Adds one edge with the value v
     def addEdge(self,v):
         self.edges.append(v)
 
-    # Return all neighbours
+    # Return all v neighbours
     def neighbours(self,v):
         neighbours = []
         for edge in self.edges:
@@ -93,7 +95,7 @@ class Graph:
         D = self.getBucketPriorityQueue(d)
         k = 0
         i = 0
-        for dontCare in range(0,len(d)):
+        for _ in range(0,len(d)):
             i = twoDimArrayIndexHelper(D)
             k = max(k,i)
             v = D[i].pop(0)
@@ -105,16 +107,20 @@ class Graph:
                     d[indexNeighbour]-=1
                     D[d[indexNeighbour]].append(neighbour)
         return (k,L)
-    
+
     def getBucketPriorityQueue(self, degreeByVertex):
         D = []
-        for i in range(0,len(self)-1) :
+        for i in range(max(degreeByVertex)+1) :
             D.append([])
         vertex = 1
         for degree in degreeByVertex:
             D[degree].append(vertex)
             vertex+=1
-        return D     
+        print("\n\n",degreeByVertex,"\n\n",D,"\n\n")
+        return D    
+
+
+    #DSATUR 
 
     def dsatur(self):
         maxColor = -1
@@ -195,10 +201,15 @@ def readGraph(path):
     return g
 
 z = readGraph("./graphes/ucidata-zachary/dataset1")
+e= [[1,2],[1,3],[3,4],[2,3]]
+g = Graph()
+g.edges = e
+print(str(g))
+print("voisin:",g.neighbours(1))
 
-(degen,dic) = z.degeneracy()
+(degen,centres) = z.degeneracy()
 print("Degenerancy :",str(degen))
-print("Centres :",dic)
+print("Centres :",centres)
 (degenMB,verticesMB) = z.matulaBeckDegeneracy()
 print("Matula & Beck degenerancy :",degenMB,"\nMatula & Beck output vertices :",verticesMB)
 (chromaticNb,colors) = z.dsatur()
