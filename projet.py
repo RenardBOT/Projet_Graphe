@@ -1,5 +1,12 @@
 import copy
 
+import sys
+
+if(len(sys.argv) != 1):
+    PATH_GRAPH = "./graphes/ucidata-zachary/dataset1"
+else:
+    PATH_GRAPH = sys.argv[1]
+
 # A graph is an object that only contains an array of edges : 
 class Graph:
     def __init__(self):
@@ -66,6 +73,7 @@ class Graph:
     def degree(self,v):
         return len(self.neighbours(v))
 
+    # Degeneracy algorithm as seen in class
     def degeneracy(self):
         k = 0
         g = copy.deepcopy(self)
@@ -108,6 +116,7 @@ class Graph:
                     D[d[indexNeighbour]].append(neighbour)
         return (k,L)
 
+    # Puts vertex of degree i in D[i] 
     def getBucketPriorityQueue(self, degreeByVertex):
         D = []
         for i in range(max(degreeByVertex)+1) :
@@ -121,6 +130,7 @@ class Graph:
 
 
     #DSATUR 
+
 
     def dsatur(self):
         maxColor = -1
@@ -140,7 +150,7 @@ class Graph:
 
             counter+=1
         return (maxColor+1,vertexColor)
-
+    
     def dsaturGetVertex(self, DSAT, vertexColor, verticesLength):
         dsatVertex = 0
         dsatDegree = 0
@@ -190,6 +200,7 @@ def twoDimArrayIndexHelper(twoDimArray):
     else:
         return index
 
+# Reads from a file and makes a graph object out of it.
 def readGraph(path):
     g = Graph()
     file = open(path,"r")
@@ -200,7 +211,7 @@ def readGraph(path):
             g.addEdge([int(i) for i in line.split()])
     return g
 
-z = readGraph("./graphes/ucidata-zachary/dataset1")
+z = readGraph(PATH_GRAPH)
 e= [[1,2],[1,3],[3,4],[2,3]]
 g = Graph()
 g.edges = e
@@ -214,3 +225,5 @@ print("Centres :",centres)
 print("Matula & Beck degenerancy :",degenMB,"\nMatula & Beck output vertices :",verticesMB)
 (chromaticNb,colors) = z.dsatur()
 print("Nombre chromatique :",chromaticNb,"\nCouleurs :",colors)
+if(len(sys.argv) > 0):
+    print("argument : ",sys.argv[1])
