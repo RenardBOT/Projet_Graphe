@@ -1,11 +1,6 @@
+import utils
 import copy
-
 import sys
-
-if(len(sys.argv) != 2):
-    PATH_GRAPH = "./graphes/ucidata-zachary/dataset1"
-else:
-    PATH_GRAPH = sys.argv[1]
 
 # A graph is an object that only contains an array of edges : 
 class Graph:
@@ -21,12 +16,7 @@ class Graph:
     
     # Returns the amount of vertices
     def __len__(self):
-        unique = []
-        for edge in self.edges:
-            for vertex in edge:
-                if vertex not in unique:
-                    unique.append(vertex)
-        return len(unique)
+        return len(self.listVertices())
 
     # Lists all vertices
     def listVertices(self):
@@ -48,16 +38,6 @@ class Graph:
     # Adds one edge with the value v
     def addEdge(self,v):
         self.edges.append(v)
-
-    # Return all v neighbours
-    def neighbours(self,v):
-        neighbours = []
-        for edge in self.edges:
-            if edge[0] == v:
-                neighbours.append(edge[1])
-            elif edge[1] == v:
-                neighbours.append(edge[0])
-        return neighbours
     
     #  Remove edge with the value v
     def remove(self,v):
@@ -72,26 +52,33 @@ class Graph:
     def degree(self,v):
         return len(self.neighbours(v))
 
+
+    # NAIVE DEGENERACY
+
     # Degeneracy algorithm as seen in class
     def degeneracy(self):
         k = 0
         g = copy.deepcopy(self)
-        vertices = g.listVertices()
-        centres = {}
+        vertices = g.listVertices() # Copying the graph. Deleting a vertex = Marking a vertex in the original graph.
+        cores = {} # Dictionnary containing K-Cores.
         
-        while(len(g) > 0 and k < 500):
+        while(len(g) > 0 and k < 300):
             rec = True
             k = k+1
-            centres[k] = []
+            cores[k] = []
             while rec is True:
                 rec = False
                 for vertex in vertices:
                     if g.degree(vertex) <= k:
                         g.remove(vertex)
                         vertices.remove(vertex)
-                        centres[k].append(vertex)
-                        rec = True    
-        return (k,centres)
+                        cores[k].append(vertex)
+                        rec = True   
+
+        if k >= 300:
+            sys.exit(utils.errorMessage(utils.Error.TOO_MANY_KCORES))
+
+        return (k,cores)
     
 
     ## MATULA & BECK
@@ -106,7 +93,7 @@ class Graph:
         k = 0
         i = 0
         for _ in range(0,len(d)):
-            i = twoDimArrayIndexHelper(D)
+            i = utils.twoDimArrayIndexHelper(D)
             k = max(k,i)
             v = D[i].pop(0)
             L.insert(0,v)
@@ -127,7 +114,17 @@ class Graph:
         for degree in degreeByVertex:
             D[degree].append(vertex)
             vertex+=1
-        return D    
+        return D
+
+    # Returns all the neighbours of vertex v
+    def neighbours(self,v):
+        neighbours = []
+        for edge in self.edges:
+            if edge[0] == v:
+                neighbours.append(edge[1])
+            elif edge[1] == v:
+                neighbours.append(edge[0])
+        return neighbours    
 
 
 
@@ -142,8 +139,8 @@ class Graph:
 
         counter = 0
         while(counter < verticesLength) :
-            dsatVertex = self.dsaturGetVertex(DSAT,vertexColor,verticesLength)
-            color = self.dsaturGetColor(DSAT, vertexColor, verticesLength, dsatVertex)
+            dsatVertex = self.dsaturGetVertex(DSAT,vertexColor)
+            color = self.dsaturGetColor(DSAT, vertexColor, dsatVertex)
             
             vertexColor[dsatVertex-1] = color
             if color > maxColor :
@@ -152,11 +149,11 @@ class Graph:
             counter+=1
         return (maxColor+1,vertexColor)
     
-    def dsaturGetVertex(self, DSAT, vertexColor, verticesLength):
+    def dsaturGetVertex(self, DSAT, vertexColor):
         dsatVertex = 0
         dsatDegree = 0
         dsatMax = -1
-        for vertex in range(1,verticesLength+1) :
+        for vertex in range(1,len(self)+1) :
             vertexIndex = vertex - 1
             if vertexColor[vertexIndex] == -1 :
                 if DSAT[vertexIndex] > dsatMax :
@@ -170,8 +167,8 @@ class Graph:
                         dsatVertex = vertex
         return dsatVertex    
 
-    def dsaturGetColor(self, DSAT, vertexColor, verticesLength, dsatVertex):
-        colorIsUsed = [False] * verticesLength
+    def dsaturGetColor(self, DSAT, vertexColor, dsatVertex):
+        colorIsUsed = [False] * len(self)
 
         neighbours = self.neighbours(dsatVertex)
         for neighbour in neighbours :
@@ -184,47 +181,3 @@ class Graph:
         while colorIsUsed[color] :
             color+=1
         return color
-
-    
-
-## FUNCTIONS
-
-# Return the index of the first array which is not empty inside of a two dim array
-# Ex : [[],[],[5],[5,6,7]] return 2
-# Ex : [[]] return -1
-def twoDimArrayIndexHelper(twoDimArray):
-    index = 0
-    empty = True
-    while(empty):
-        empty = len(twoDimArray[index]) == 0
-        index+=1
-    index-=1
-    if empty:
-        return -1
-    else:
-        return index
-
-# Reads from a file and makes a graph object out of it.
-def readGraph(path):
-    g = Graph()
-    file = open(path,"r")
-    lines = file.readlines()
-    for line in lines:
-        if line[0] != "%":
-            g.addEdge([int(i) for i in line.split()])
-    return g
-
-
-## MAIN
-
-z = readGraph(PATH_GRAPH)
-
-(degen,centres) = z.degeneracy()
-(degenMB,verticesMB) = z.matulaBeckDegeneracy()
-(chromaticNb,colors) = z.dsatur()
-
-print("Degenerancy :",str(degen),"\nCores :",centres)
-print("----------")
-print("Matula & Beck Degeneracy :",degenMB,"\nMatula & Beck output vertices :",verticesMB)
-print("----------")
-print("Chromatic Number :",chromaticNb,"\nColors :",colors)
