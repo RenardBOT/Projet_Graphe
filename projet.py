@@ -2,7 +2,7 @@ import copy
 
 import sys
 
-if(len(sys.argv) != 1):
+if(len(sys.argv) != 2):
     PATH_GRAPH = "./graphes/ucidata-zachary/dataset1"
 else:
     PATH_GRAPH = sys.argv[1]
@@ -30,12 +30,11 @@ class Graph:
 
     # Lists all vertices
     def listVertices(self):
-        unique = []
+        unique = set()
         for edge in self.edges:
             for vertex in edge:
-                if vertex not in unique:
-                    unique.append(vertex)
-        return unique
+                unique.add(vertex)
+        return list(unique)
     
     # Returns an array containing the degree of each vertex
     # Ex : index = 0, value = 4 mean the first vertex has a degree of 4
@@ -94,6 +93,9 @@ class Graph:
                         rec = True    
         return (k,centres)
     
+
+    ## MATULA & BECK
+
     # At the end of the algorithm, any vertex L[i] will have at most k edges
     def matulaBeckDegeneracy(self):
         # https://en.wikipedia.org/wiki/Degeneracy_(graph_theory)#Algorithms
@@ -125,12 +127,11 @@ class Graph:
         for degree in degreeByVertex:
             D[degree].append(vertex)
             vertex+=1
-        print("\n\n",degreeByVertex,"\n\n",D,"\n\n")
         return D    
 
 
-    #DSATUR 
 
+    ## DSATUR 
 
     def dsatur(self):
         maxColor = -1
@@ -185,6 +186,9 @@ class Graph:
         return color
 
     
+
+## FUNCTIONS
+
 # Return the index of the first array which is not empty inside of a two dim array
 # Ex : [[],[],[5],[5,6,7]] return 2
 # Ex : [[]] return -1
@@ -205,25 +209,22 @@ def readGraph(path):
     g = Graph()
     file = open(path,"r")
     lines = file.readlines()
-    g.vertices = int(lines[1].split()[3])
     for line in lines:
         if line[0] != "%":
             g.addEdge([int(i) for i in line.split()])
     return g
 
+
+## MAIN
+
 z = readGraph(PATH_GRAPH)
-e= [[1,2],[1,3],[3,4],[2,3]]
-g = Graph()
-g.edges = e
-print(str(g))
-print("voisin:",g.neighbours(1))
 
 (degen,centres) = z.degeneracy()
-print("Degenerancy :",str(degen))
-print("Centres :",centres)
 (degenMB,verticesMB) = z.matulaBeckDegeneracy()
-print("Matula & Beck degenerancy :",degenMB,"\nMatula & Beck output vertices :",verticesMB)
 (chromaticNb,colors) = z.dsatur()
-print("Nombre chromatique :",chromaticNb,"\nCouleurs :",colors)
-if(len(sys.argv) > 0):
-    print("argument : ",sys.argv[1])
+
+print("Degenerancy :",str(degen),"\nCores :",centres)
+print("----------")
+print("Matula & Beck Degeneracy :",degenMB,"\nMatula & Beck output vertices :",verticesMB)
+print("----------")
+print("Chromatic Number :",chromaticNb,"\nColors :",colors)
